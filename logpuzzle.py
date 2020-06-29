@@ -20,14 +20,35 @@ import sys
 import urllib.request
 import argparse
 
+# https://github.com/soulxhacker/Google-Python-LogPuzzle/blob/master/logpuzzle.py
+
 
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    with open(filename) as open_file:
+        file_list = open_file.readlines()  # save whats in the file to a list.
+        urls = []  # a list that will soon contain all of the urls we need!
+
+        # iterate over each file in our filelist
+        for string in file_list:
+            current_string = string  # saving the iterator string to a var
+            file_pattern = r'/edu.*.jpg'  # a regex pattern used to find the images
+            # searching for a match
+            file_match = re.search(file_pattern, current_string)
+            if file_match:
+                # if we find a match...
+                if "http://code.google.com"+file_match.group() not in urls:
+                    print("Found a match!")
+                    # add the complete url obtained from the string to the url list
+                    urls.append("http://code.google.com"+file_match.group())
+            else:
+                # we do nothing
+                print("No match")
+            sorted_urls = sorted(urls, key=last_word)
+        return sorted_urls  # so we can pass into next function
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +59,39 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    file_count = 0
+    if os.path.exists(dest_dir):
+        for img in img_urls:
+            print(f"Retrieving {file_count + 1} image(s)...")
+            file_img_path = os.path.join(dest_dir, f"img{file_count}")
+            file_count += 1
+            urllib.request.urlretrieve(img, file_img_path)
+    else:
+        image_dir = os.mkdir(dest_dir)
+        for img in img_urls:
+            print(f"Retrieving {file_count + 1} images...")
+            file_img_path = os.path.join(dest_dir, f"img{file_count}")
+            file_count += 1
+            urllib.request.urlretrieve(img, file_img_path)
+
+    with open(dest_dir+'/index.html', 'w') as filename:
+
+        html_boiler = """<html>
+        <head></head>
+        <body>
+        """
+        html_closer = "</body></html>"
+        filename.write(html_boiler)
+        for img in img_urls:
+            img_string = f"<img src={img}></img>"
+            filename.write(img_string)
+        filename.write(html_closer)
+
+    return  # returns the list of filenames
+
+
+def last_word(url):
+    return re.findall(r"-(....).jpg", url)
 
 
 def create_parser():
@@ -47,7 +99,8 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--todir',
                         help='destination directory for downloaded images')
-    parser.add_argument('logfile', help='apache logfile to extract urls from')
+    parser.add_argument(
+        'logfile', help='apache logfile to extract urls from')
 
     return parser
 
