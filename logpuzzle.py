@@ -35,19 +35,22 @@ def read_urls(filename):
         # iterate over each file in our filelist
         for string in file_list:
             current_string = string  # saving the iterator string to a var
-            file_pattern = r'/edu.*.jpg'  # a regex pattern used to find the images
+            # a regex pattern used to find the images
+            file_pattern = r'/edu.*.jpg'
             # searching for a match
             file_match = re.search(file_pattern, current_string)
             if file_match:
                 # if we find a match...
                 if "http://code.google.com"+file_match.group() not in urls:
-                    print("Found a match!")
-                    # add the complete url obtained from the string to the url list
+                    # add the complete url obtained
+                    #  the string to the url list
                     urls.append("http://code.google.com"+file_match.group())
             else:
                 # we do nothing
-                print("No match")
+                pass
             sorted_urls = sorted(urls, key=last_word)
+        for url in sorted_urls:
+            print(url + '\n')
         return sorted_urls  # so we can pass into next function
 
 
@@ -62,15 +65,15 @@ def download_images(img_urls, dest_dir):
     file_count = 0
     if os.path.exists(dest_dir):
         for img in img_urls:
-            print(f"Retrieving {file_count + 1} image(s)...")
-            file_img_path = os.path.join(dest_dir, f"img{file_count}")
+            print('Retrieving {} image(s)...'.format(file_count + 1))
+            file_img_path = os.path.join(dest_dir, 'img{}'.format(file_count))
             file_count += 1
             urllib.request.urlretrieve(img, file_img_path)
     else:
         image_dir = os.mkdir(dest_dir)
         for img in img_urls:
-            print(f"Retrieving {file_count + 1} images...")
-            file_img_path = os.path.join(dest_dir, f"img{file_count}")
+            print('Retrieving {} images...'.format(file_count + 1))
+            file_img_path = os.path.join(image_dir, 'img{}'.format(file_count))
             file_count += 1
             urllib.request.urlretrieve(img, file_img_path)
 
@@ -83,7 +86,7 @@ def download_images(img_urls, dest_dir):
         html_closer = "</body></html>"
         filename.write(html_boiler)
         for img in img_urls:
-            img_string = f"<img src={img}></img>"
+            img_string = '<img src={}></img>'.format(img)
             filename.write(img_string)
         filename.write(html_closer)
 
@@ -91,6 +94,8 @@ def download_images(img_urls, dest_dir):
 
 
 def last_word(url):
+    """Use a regex pattern to capture the last 
+    word of the file to sort alphabetically."""
     return re.findall(r"-(....).jpg", url)
 
 
